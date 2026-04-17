@@ -38,6 +38,11 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
     try:
         ensure_users_table()
+    except Exception as exc:  # noqa: BLE001
+        logging.exception("Login ensure_users_table failed: %s", exc)
+        return error_response(f"Could not initialise the users table: {exc}", 500)
+
+    try:
         conn = get_db_connection()
         cur = conn.cursor()
 
@@ -52,4 +57,4 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         })
     except Exception as exc:  # noqa: BLE001
         logging.exception("Login failed: %s", exc)
-        return error_response("Could not sign in.")
+        return error_response(f"Could not sign in: {exc}", 500)

@@ -48,6 +48,11 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
     try:
         ensure_users_table()
+    except Exception as exc:  # noqa: BLE001
+        logging.exception("Register ensure_users_table failed: %s", exc)
+        return error_response(f"Could not initialise the users table: {exc}", 500)
+
+    try:
         conn = get_db_connection()
         cur = conn.cursor()
 
@@ -65,4 +70,6 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         return json_response({"username": username, "email": email}, status_code=201)
     except Exception as exc:  # noqa: BLE001
         logging.exception("Register failed: %s", exc)
-        return error_response("Could not create the account.")
+        # Surface the underlying error so it's easy to diagnose in the browser
+        # console. Safe for this course project since the DB is isolated.
+        return error_response(f"Could not create the account: {exc}", 500)

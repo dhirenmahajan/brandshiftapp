@@ -11,7 +11,7 @@ from __future__ import annotations
 import base64
 import hashlib
 import hmac
-import os
+import logging
 import secrets
 
 from shared_code.db import get_db_connection
@@ -19,29 +19,50 @@ from shared_code.db import get_db_connection
 _ITERATIONS = 100_000
 _ALGO = "pbkdf2_sha256"
 
+_CREATE_USERS_SQL = """
+CREATE TABLE dbo.Users (
+    user_id       INT IDENTITY(1,1) PRIMARY KEY,
+    username      VARCHAR(40)  NOT NULL,
+    email         VARCHAR(120) NOT NULL,
+    password_hash VARCHAR(256) NOT NULL,
+    created_at    DATETIME2    NOT NULL CONSTRAINT DF_Users_created_at DEFAULT SYSUTCDATETIME(),
+    CONSTRAINT UQ_Users_username UNIQUE (username),
+    CONSTRAINT UQ_Users_email    UNIQUE (email)
+)
+"""
+
 
 def ensure_users_table() -> None:
-    """Create the Users table on first use (idempotent)."""
+    """Create the Users table on first use (idempotent).
+
+    Avoids the `IF NOT EXISTS ... BEGIN ... END` batch shape because some
+    pymssql / TDS driver combinations surface it as a prepare-time syntax
+    error. Instead we poll `OBJECT_ID` first and run a plain CREATE when
+    the object is missing.
+    """
     conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute(
-        """
-        IF NOT EXISTS (
-            SELECT 1 FROM INFORMATION_SCHEMA.TABLES
-            WHERE TABLE_SCHEMA = 'dbo' AND TABLE_NAME = 'Users'
-        )
-        BEGIN
-            CREATE TABLE dbo.Users (
-                user_id      INT IDENTITY(1,1) PRIMARY KEY,
-                username     VARCHAR(40)  NOT NULL UNIQUE,
-                email        VARCHAR(120) NOT NULL UNIQUE,
-                password_hash VARCHAR(256) NOT NULL,
-                created_at   DATETIME2    NOT NULL DEFAULT SYSUTCDATETIME()
-            );
-        END
-        """
-    )
-    conn.commit()
+    try:
+        cur = conn.cursor()
+        cur.execute("SELECT OBJECT_ID('dbo.Users', 'U')")
+        row = cur.fetchone()
+        if row and row[0]:
+            return
+
+        try:
+            cur.execute(_CREATE_USERS_SQL)
+            conn.commit()
+        except Exception:  # noqa: BLE001
+            # Another worker may have raced us; re-check to confirm.
+            cur.execute("SELECT OBJECT_ID('dbo.Users', 'U')")
+            row = cur.fetchone()
+            if not (row and row[0]):
+                raise
+            logging.info("dbo.Users was created concurrently; continuing.")
+    finally:
+        try:
+            conn.close()
+        except Exception:  # noqa: BLE001
+            pass
 
 
 def hash_password(password: str) -> str:
