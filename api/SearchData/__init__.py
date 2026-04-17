@@ -1,76 +1,97 @@
 import logging
-import json
 import azure.functions as func
 
-from shared_code.db import get_db_connection
+from shared_code.db import (
+    cors_preflight,
+    error_response,
+    fetch_all_dicts,
+    get_db_connection,
+    json_response,
+)
+
+QUERY = """
+SELECT
+    t.HSHD_NUM       AS Hshd_num,
+    t.BASKET_NUM     AS Basket_num,
+    t.PURCHASE_DATE  AS [Date],
+    t.PRODUCT_NUM    AS Product_num,
+    p.DEPARTMENT     AS Department,
+    p.COMMODITY      AS Commodity,
+    p.BRAND_TY       AS Brand_type,
+    p.NATURAL_ORGANIC_FLAG AS Organic_flag,
+    t.SPEND          AS Spend,
+    t.UNITS          AS Units,
+    t.STORE_R        AS Store_region,
+    t.WEEK_NUM       AS Week_num,
+    t.YEAR           AS Year_num
+FROM dbo.Transactions t
+LEFT JOIN dbo.Households h ON t.HSHD_NUM = h.HSHD_NUM
+LEFT JOIN dbo.Products   p ON t.PRODUCT_NUM = p.PRODUCT_NUM
+WHERE t.HSHD_NUM = %s
+ORDER BY
+    t.HSHD_NUM ASC,
+    t.BASKET_NUM ASC,
+    t.PURCHASE_DATE ASC,
+    t.PRODUCT_NUM ASC,
+    p.DEPARTMENT ASC,
+    p.COMMODITY ASC;
+"""
+
+HOUSEHOLD_QUERY = """
+SELECT TOP 1
+    HSHD_NUM          AS Hshd_num,
+    L                 AS Loyalty_flag,
+    AGE_RANGE         AS Age_range,
+    MARITAL           AS Marital_status,
+    INCOME_RANGE      AS Income_range,
+    HOMEOWNER         AS Homeowner_desc,
+    HSHD_COMPOSITION  AS Hshd_composition,
+    HH_SIZE           AS Hshd_size,
+    CHILDREN          AS Children
+FROM dbo.Households
+WHERE HSHD_NUM = %s;
+"""
+
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
-    logging.info('Executing SearchData function.')
+    if req.method == "OPTIONS":
+        return cors_preflight()
 
-    hshd_num = req.params.get('hshd_num')
+    logging.info("Executing SearchData function.")
+
+    hshd_num = req.params.get("hshd_num")
     if not hshd_num:
         try:
-            req_body = req.get_json()
+            body = req.get_json()
+            hshd_num = body.get("hshd_num") if body else None
         except ValueError:
-            pass
-        else:
-            hshd_num = req_body.get('hshd_num')
+            hshd_num = None
 
-    if not hshd_num:
-        return func.HttpResponse(
-             "Please pass a hshd_num on the query string or in the request body",
-             status_code=400
-        )
-
-    query = """
-    SELECT 
-        t.Hshd_num, 
-        t.Basket_num, 
-        t.PURCHASE_DATE as Date, 
-        t.Product_num, 
-        p.Department, 
-        p.Commodity
-    FROM 
-        dbo.Transactions t
-    LEFT JOIN 
-        dbo.Households h ON t.Hshd_num = h.Hshd_num
-    LEFT JOIN 
-        dbo.Products p ON t.Product_num = p.Product_num
-    WHERE 
-        t.Hshd_num = %d
-    ORDER BY 
-        t.Hshd_num ASC, 
-        t.Basket_num ASC, 
-        t.PURCHASE_DATE ASC, 
-        t.Product_num ASC, 
-        p.Department ASC, 
-        p.Commodity ASC;
-    """
+    if hshd_num is None or str(hshd_num).strip() == "":
+        return error_response("Please pass a hshd_num on the query string or in the request body.", 400)
 
     try:
-        # Convert to int to validate safety
-        hshd_num_int = int(hshd_num)
-        
+        hshd_num_int = int(str(hshd_num).strip())
+    except ValueError:
+        return error_response("hshd_num must be an integer.", 400)
+
+    try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute(query, (hshd_num_int,))
-        
-        columns = [column[0] for column in cursor.description]
-        results = []
-        for row in cursor.fetchall():
-            results.append(dict(zip(columns, row)))
-            
-        return func.HttpResponse(
-            json.dumps(results, default=str),
-            mimetype="application/json",
-            status_code=200
-        )
 
-    except ValueError:
-       return func.HttpResponse("hshd_num must be an integer.", status_code=400)
-    except Exception as e:
-        logging.error(f"Error querying database: {e}")
-        return func.HttpResponse(
-            "An error occurred while fetching search data.",
-            status_code=500
-        )
+        cursor.execute(HOUSEHOLD_QUERY, (hshd_num_int,))
+        household_rows = fetch_all_dicts(cursor)
+        household = household_rows[0] if household_rows else None
+
+        cursor.execute(QUERY, (hshd_num_int,))
+        transactions = fetch_all_dicts(cursor)
+
+        return json_response({
+            "hshd_num": hshd_num_int,
+            "household": household,
+            "transactions": transactions,
+            "count": len(transactions),
+        })
+    except Exception as exc:  # noqa: BLE001
+        logging.exception("SearchData failed: %s", exc)
+        return error_response("An error occurred while fetching search data.")

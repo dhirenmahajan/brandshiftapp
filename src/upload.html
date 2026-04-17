@@ -8,9 +8,8 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <div class="app-container">
-    
-    <!-- Sidebar Navigation -->
+  <div id="upload-root" class="app-container">
+
     <aside class="sidebar">
       <div class="brand-header">
         <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent-cyan)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -23,42 +22,55 @@
           <li><a href="dashboard.html" class="nav-item">Dashboard</a></li>
           <li><a href="search.html" class="nav-item">Data Search</a></li>
           <li><a href="upload.html" class="nav-item active">Data Upload</a></li>
-          <li style="margin-top: 40px;"><a href="index.html" class="nav-item" style="color: var(--status-danger);">Logout</a></li>
+          <li style="margin-top: 40px;"><a href="#" data-action="logout" class="nav-item" style="color: var(--status-danger);">Logout</a></li>
         </ul>
       </nav>
+      <div style="margin-top: auto; font-size: 0.8rem; color: var(--text-muted);">
+        Signed in as <strong id="session-user">Analyst</strong>
+      </div>
     </aside>
 
-    <!-- Main Content -->
     <main class="main-content">
       <header class="page-header">
         <h1 class="page-title">Data Ingestion Engine</h1>
-        <p class="page-subtitle">Upload the latest Transactions, Households, and Products files to the Azure Data Store.</p>
+        <p class="page-subtitle">Refresh the warehouse with the latest Transactions, Households, and Products CSVs. File names must contain <code>transaction</code>, <code>household</code>, or <code>product</code> so the router can place them in the right table.</p>
       </header>
 
-      <div class="glass-panel" style="padding: 40px; margin-bottom: 32px;">
+      <div class="glass-panel" style="padding: 32px; margin-bottom: 32px;">
         <div id="upload-area" class="upload-area">
           <div class="upload-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
               <polyline points="17 8 12 3 7 8"></polyline>
               <line x1="12" y1="3" x2="12" y2="15"></line>
             </svg>
           </div>
-          <h3 style="margin-bottom: 8px;">Drag & Drop CSV Files Here</h3>
-          <p style="color: var(--text-muted); margin-bottom: 16px;">Files supported: 400_transactions.csv, 400_households.csv, 400_products.csv</p>
-          <button class="btn-secondary" onclick="document.getElementById('csv-file').click()">Browse Files</button>
-          
+          <h3 style="margin-bottom: 8px;">Drag &amp; drop CSV files here</h3>
+          <p style="color: var(--text-muted); margin-bottom: 16px;">Accepted: <code>400_transactions.csv</code>, <code>400_households.csv</code>, <code>400_products.csv</code>. You can drop multiple files at once.</p>
+          <button class="btn-secondary" type="button" onclick="document.getElementById('csv-file').click()">Browse Files</button>
+
           <form id="upload-form" enctype="multipart/form-data" style="display: none;">
-            <input id="csv-file" name="csv-file" type="file" accept=".csv" />
+            <input id="csv-file" name="csv-file" type="file" accept=".csv" multiple />
           </form>
         </div>
 
         <div id="upload-status" style="margin-top: 24px;"></div>
       </div>
+
+      <div class="glass-panel" style="padding: 24px;">
+        <h3 style="margin-bottom: 12px;">How the loader works</h3>
+        <ul style="color: var(--text-muted); line-height: 1.8; padding-left: 20px;">
+          <li>Normalises column names the same way the initial Azure loader did (trim, replace whitespace with <code>_</code>).</li>
+          <li>Replaces the existing table contents atomically (disables FKs, truncates, bulk inserts in batches of 1,000).</li>
+          <li>Any upload here immediately updates the dashboard and the household search page.</li>
+        </ul>
+      </div>
     </main>
 
   </div>
 
+  <script src="js/api.js"></script>
+  <script src="js/session.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

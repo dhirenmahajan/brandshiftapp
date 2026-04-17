@@ -20,7 +20,16 @@ To predict long-term revenue potential and prioritize high-value customers, **Gr
 ## Part 2: ML Model Application - Basket Analysis
 *Requirement 7: Use Random Forest to perform Basket Analysis to drive cross-selling opportunities.*
 
-While traditional market basket analysis utilizes Apriori, we can innovate by leveraging a **Random Forest Classifier** to map predictive probabilities of cross-purchasing.
+We layer two complementary techniques: a live **association-rule engine** (running inside Azure SQL and exposed as `GET /api/analytics/basket`) that surfaces the top commodity pairs by Lift + Confidence, plus a **Random Forest Classifier** that predicts the probability a household cross-purchases a given commodity given the rest of their basket profile.
+
+### Live implementation
+The `AnalyticsBasket` Azure Function builds a `basket_commodity` CTE of distinct (basket, commodity) tuples, self-joins it on shared basket numbers, and returns the top-N pairs ordered by co-occurrence. Python then computes:
+
+- `support(A ∩ B) = baskets_together / total_baskets`
+- `confidence(A→B) = together / support(A)`
+- `lift(A,B) = support(A∩B) / (support(A) × support(B))`
+
+The dashboard's Basket Analysis card renders these directly.
 
 ### Strategic Insight
 Our Random Forest model isolated `DEPARTMENT` and `COMMODITY` associations. The highest predictive probability identified was that customers who purchase **"GROCERY"** (specifically "BEEF") have an 81% likelihood of cross-purchasing **"PRODUCE"** (specifically "SALAD"). To drive cross-selling, retailers should implement a dynamic digital couponing system that immediately offers a 10% discount on Produce when Beef is added to the cart, shifting generic spend into higher-margin organic produce.
@@ -65,8 +74,17 @@ print("\nTop Predictors for Produce Cross-Selling:\n", feature_imp.head(3))
 *Requirement 8: At-risk customers, retention strategies, supported by regression and correlation.*
 
 ### Strategic Insight
-We define "Churn Risk" mathematically as a continuous downward trajectory in total quarterly spend. By running a **Linear Regression** alongside a **Correlation Matrix**, we map how specific demographic groups (e.g. `HH_SIZE`, `INCOME_RANGE`) correlate with disengagement. The regression output—visualized physically on our web dashboard—allows us to identify "stagnant" households *before* they completely churn. 
-**Retention Strategy:** We instantly dispatch categorized personalized emails with heavy discounts on Private Label brands to price-sensitive churning households, preventing disengagement.
+We define "Churn Risk" mathematically as a continuous downward trajectory in total quarterly spend. By running a **Linear Regression** alongside a **Correlation Matrix**, we map how specific demographic groups (e.g. `HH_SIZE`, `INCOME_RANGE`) correlate with disengagement. The regression output—visualised on our web dashboard—allows us to identify "stagnant" households *before* they completely churn.
+
+### Live implementation
+The `AnalyticsChurn` Azure Function (`GET /api/analytics/churn`):
+
+1. Pulls quarterly `SUM(SPEND)` per household from `dbo.Transactions`.
+2. Fits a least-squares slope for each household using only the Python stdlib (no pandas / sklearn in the Function runtime → fast cold starts).
+3. Classifies each household: `healthy` (slope ≥ 0), `stagnant` (small negative slope), `at_risk` (slope < -15), `inactive` (no spend).
+4. Returns per-status counts, a monthly active-household time series, and the top-20 most negative slopes joined with demographics so the dashboard can recommend retention offers.
+
+**Retention Strategy:** We instantly dispatch categorised personalised emails with heavy discounts on Private Label brands to price-sensitive churning households, preventing disengagement.
 
 ### Python Implementation (Linear Regression & Correlation)
 ```python

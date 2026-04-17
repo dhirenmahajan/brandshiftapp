@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BrandShift | Login</title>
+  <title>BrandShift | Register</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
 </head>
@@ -16,28 +16,28 @@
         </svg>
         <span class="brand-text">BrandShift</span>
       </div>
-      <p style="color: var(--text-muted); margin-bottom: 32px;">Welcome back. Sign in to your analytics workspace.</p>
+      <p style="color: var(--text-muted); margin-bottom: 32px;">Create an analyst account to explore the retail data.</p>
 
-      <form id="login-form" autocomplete="on">
+      <form id="register-form" autocomplete="on">
         <div class="form-group" style="text-align: left;">
           <label for="username" class="form-label">Username</label>
-          <input id="username" name="username" type="text" class="form-input" required placeholder="analyst01" autocomplete="username" />
+          <input id="username" name="username" type="text" class="form-input" required minlength="3" maxlength="40" placeholder="analyst01" autocomplete="username" />
         </div>
         <div class="form-group" style="text-align: left;">
           <label for="email" class="form-label">Email</label>
           <input id="email" name="email" type="email" class="form-input" required placeholder="name@company.com" autocomplete="email" />
         </div>
         <div class="form-group" style="text-align: left;">
-          <label for="password" class="form-label">Password</label>
-          <input id="password" name="password" type="password" class="form-input" required placeholder="••••••••" autocomplete="current-password" />
+          <label for="password" class="form-label">Password <span style="color: var(--text-muted); font-size: 0.8rem;">(min 6 chars)</span></label>
+          <input id="password" name="password" type="password" class="form-input" required minlength="6" placeholder="••••••••" autocomplete="new-password" />
         </div>
 
-        <button type="submit" class="btn-primary" style="width: 100%; margin-top: 8px;">Sign In to Dashboard</button>
+        <button type="submit" class="btn-primary" style="width: 100%; margin-top: 8px;">Create Account</button>
         <p id="auth-status" style="margin-top: 16px; min-height: 1.2em; font-size: 0.9rem;"></p>
       </form>
 
       <div style="margin-top: 16px; font-size: 0.9rem;">
-         <p style="color: var(--text-muted);">New here? <a href="register.html">Create an account</a></p>
+         <p style="color: var(--text-muted);">Already have an account? <a href="index.html">Sign in</a></p>
       </div>
     </div>
   </div>

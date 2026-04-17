@@ -3,15 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BrandShift | Dashboard</title>
+  <title>BrandShift | Executive Dashboard</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-  <div class="app-container">
-    
-    <!-- Sidebar Navigation -->
+  <div id="dashboard-root" class="app-container">
+
     <aside class="sidebar">
       <div class="brand-header">
         <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent-cyan)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -24,94 +23,153 @@
           <li><a href="dashboard.html" class="nav-item active">Dashboard</a></li>
           <li><a href="search.html" class="nav-item">Data Search</a></li>
           <li><a href="upload.html" class="nav-item">Data Upload</a></li>
-          <li style="margin-top: 40px;"><a href="index.html" class="nav-item" style="color: var(--status-danger);">Logout</a></li>
+          <li style="margin-top: 40px;"><a href="#" data-action="logout" class="nav-item" style="color: var(--status-danger);">Logout</a></li>
         </ul>
       </nav>
-      
-      <!-- Demographic Filters -->
+
       <div style="margin-top: 40px; border-top: 1px solid var(--border-glass); padding-top: 24px;">
-        <h4 style="color: var(--text-muted); margin-bottom: 16px; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px;">Demographic Filters</h4>
-        <div class="form-group">
-          <select class="form-input" style="padding: 8px;">
-            <option>All Regions</option>
-            <option>East</option>
-            <option>West</option>
-            <option>South</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <select class="form-input" style="padding: 8px;">
-            <option>All Incomes</option>
-            <option>Under 35K</option>
-            <option>35K - 75K</option>
-            <option>75K+</option>
-          </select>
-        </div>
-        <button class="btn-secondary" style="width: 100%; padding: 8px; font-size: 0.9rem;">Apply Filters</button>
+        <h4 style="color: var(--text-muted); margin-bottom: 16px; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.1em;">Demographic Filters</h4>
+        <form id="filter-form">
+          <div class="form-group">
+            <label class="form-label" for="filter-region">Region</label>
+            <select id="filter-region" name="region" class="form-input" style="padding: 10px;">
+              <option value="all">All Regions</option>
+              <option value="EAST">East</option>
+              <option value="WEST">West</option>
+              <option value="CENTRAL">Central</option>
+              <option value="SOUTH">South</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="filter-income">Income</label>
+            <select id="filter-income" name="income" class="form-input" style="padding: 10px;">
+              <option value="all">All Incomes</option>
+              <option>UNDER 35K</option>
+              <option>35-49K</option>
+              <option>50-74K</option>
+              <option>75-99K</option>
+              <option>100-150K</option>
+              <option>150K+</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="filter-size">Household Size</label>
+            <select id="filter-size" name="size" class="form-input" style="padding: 10px;">
+              <option value="all">All Sizes</option>
+              <option>1</option>
+              <option>2</option>
+              <option>3</option>
+              <option>4</option>
+              <option>5+</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="filter-children">Children</label>
+            <select id="filter-children" name="children" class="form-input" style="padding: 10px;">
+              <option value="all">Any Children Count</option>
+              <option>1</option>
+              <option>2</option>
+              <option>3+</option>
+            </select>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button type="submit" class="btn-primary" style="flex: 1; padding: 10px;">Apply</button>
+            <button type="button" id="filter-reset" class="btn-secondary" style="flex: 1; padding: 10px;">Reset</button>
+          </div>
+        </form>
+      </div>
+
+      <div style="margin-top: auto; padding-top: 24px; font-size: 0.8rem; color: var(--text-muted);">
+        Signed in as <strong id="session-user">Analyst</strong>
       </div>
     </aside>
 
-    <!-- Main Content -->
     <main class="main-content">
-      <header class="page-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+      <header class="page-header" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap;">
         <div>
-          <h1 class="page-title">Executive Dashboard</h1>
-          <p class="page-subtitle">Proactive Margin-Boosting Analysis & ML Churn Prediction</p>
+          <h1 class="page-title">Executive Retail Dashboard</h1>
+          <p class="page-subtitle">Live intelligence from the 84.51°/Kroger sample · ML-driven churn + cross-sell signals.</p>
         </div>
-        <button class="btn-primary">Export Report PDF</button>
       </header>
 
-      <!-- KPI Grid -->
-      <div class="dashboard-grid">
-        <div class="glass-panel metric-card">
-          <span class="metric-title">Total Processed Spend (YTD)</span>
-          <span class="metric-value">$1,245,600</span>
-          <div style="margin-top: 8px; display: flex; align-items: center; gap: 8px; color: var(--status-success); font-size: 0.9rem;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
-            <span>+12.5% vs Last Year</span>
+      <!-- KPI cards -->
+      <div id="kpi-grid" class="dashboard-grid" aria-busy="true"></div>
+
+      <!-- Spend shift chart -->
+      <div class="glass-panel" style="margin-bottom: 24px;">
+        <div class="section-header">
+          <h3 class="section-title">Spend Momentum: National vs. Private Label vs. Organic</h3>
+          <span class="badge badge-info">Live Azure SQL</span>
+        </div>
+        <div class="chart-container"><canvas id="spendShiftChart"></canvas></div>
+      </div>
+
+      <!-- Dual row: demographics + seasonal -->
+      <div class="dashboard-two-col">
+        <div class="glass-panel">
+          <div class="section-header">
+            <h3 class="section-title">Demographic Engagement · Avg Spend / Household by Income</h3>
+          </div>
+          <div class="chart-container small"><canvas id="demographicsChart"></canvas></div>
+          <div style="padding: 0 24px 24px;">
+            <h4 style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px;">Household Size Breakdown</h4>
+            <div id="demographics-size"></div>
           </div>
         </div>
-        <div class="glass-panel metric-card">
-          <span class="metric-title">Private Label Conversion Rate</span>
-          <span class="metric-value">34.2%</span>
-          <div style="margin-top: 8px; display: flex; align-items: center; gap: 8px; color: var(--status-success); font-size: 0.9rem;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
-            <span>+5.1% Shift</span>
+        <div class="glass-panel">
+          <div class="section-header">
+            <h3 class="section-title">Seasonal Pattern · Average Weekly Spend by Month</h3>
           </div>
-        </div>
-        <div class="glass-panel metric-card">
-          <span class="metric-title">High Risk Churn Households</span>
-          <span class="metric-value" style="color: var(--status-danger);">28</span>
-          <div style="margin-top: 8px; display: flex; align-items: center; gap: 8px; color: var(--status-danger); font-size: 0.9rem;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline><polyline points="17 18 23 18 23 12"></polyline></svg>
-            <span>Based on Grad. Boosting Model</span>
+          <div class="chart-container small"><canvas id="seasonalChart"></canvas></div>
+          <div style="padding: 0 24px 24px; color: var(--text-muted); font-size: 0.85rem;">
+            Use this to plan inventory and promotions for peak weeks.
           </div>
         </div>
       </div>
 
-      <!-- Charts Area -->
-      <div class="glass-panel" style="margin-bottom: 32px;">
-        <div style="padding: 24px; border-bottom: 1px solid var(--border-glass);">
-          <h3 style="font-weight: 600;">Spend Momentum: National vs. Private Label & Organic</h3>
+      <!-- Churn -->
+      <div class="glass-panel" style="margin-bottom: 24px;">
+        <div class="section-header">
+          <div>
+            <h3 class="section-title">Churn Risk · Linear Regression Slopes per Household</h3>
+            <p style="margin-top: 6px; color: var(--text-muted); font-size: 0.85rem;">Rubric Req. 8 · identifies households with a negative quarterly spend trend.</p>
+          </div>
+          <div id="churn-counts"></div>
         </div>
-        <div class="chart-container">
-          <canvas id="spendShiftChart"></canvas>
+        <div class="chart-container small"><canvas id="churnChart"></canvas></div>
+      </div>
+
+      <!-- Basket analysis (Req. 7) -->
+      <div class="glass-panel" style="margin-bottom: 24px;">
+        <div class="section-header">
+          <div>
+            <h3 class="section-title">Basket Analysis · Top Cross-Sell Commodity Pairs</h3>
+            <p style="margin-top: 6px; color: var(--text-muted); font-size: 0.85rem;">Rubric Req. 7 · co-occurrence lift &amp; confidence from basket data.</p>
+          </div>
+          <span class="badge badge-info">Association Rules</span>
+        </div>
+        <div class="data-table-container" style="border: none;">
+          <table class="brand-table">
+            <thead>
+              <tr>
+                <th>Commodity A</th>
+                <th>Commodity B</th>
+                <th class="num">Baskets Together</th>
+                <th class="num">Lift</th>
+                <th class="num">Confidence</th>
+              </tr>
+            </thead>
+            <tbody id="basket-body">
+              <tr><td colspan="5" style="text-align:center; color: var(--text-muted);">Loading basket associations...</td></tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
-      <div class="glass-panel" style="margin-bottom: 32px;">
-        <div style="padding: 24px; border-bottom: 1px solid var(--border-glass);">
-          <h3 style="font-weight: 600;">Churn Risk Profile: Predict Disengagement Over Time (Linear Regression Output)</h3>
-        </div>
-        <div class="chart-container">
-          <canvas id="churnChart"></canvas>
-        </div>
-      </div>
-
-      <!-- ML Output Table -->
-      <div class="glass-panel">
-        <div style="padding: 24px; border-bottom: 1px solid var(--border-glass); display: flex; justify-content: space-between; align-items: center;">
-          <h3 style="font-weight: 600;">ML Re-engagement Engine (Gradient Boosting)</h3>
+      <!-- Re-engagement ML table -->
+      <div class="glass-panel" style="margin-bottom: 24px;">
+        <div class="section-header">
+          <h3 class="section-title">ML Re-engagement Engine · Top Households at Risk</h3>
           <span class="badge badge-risk">Live Inference</span>
         </div>
         <div class="data-table-container" style="border: none;">
@@ -119,42 +177,24 @@
             <thead>
               <tr>
                 <th>HSHD_NUM</th>
-                <th>Est. Demographics</th>
+                <th>Demographics</th>
                 <th>Spend Trajectory</th>
-                <th>Cross-Sell Recommendation</th>
+                <th>Suggested Offer</th>
                 <th>Action</th>
               </tr>
             </thead>
-            <tbody>
-              <tr>
-                <td style="font-weight: 600;">0014</td>
-                <td>35K - 75K | Children: Yes</td>
-                <td><span style="color: var(--status-danger);">Declining (-15%)</span></td>
-                <td><span style="color: var(--accent-cyan);">Private Label Cereal</span></td>
-                <td><button class="btn-secondary" style="padding: 6px 12px; font-size: 0.8rem;">Send Coupon</button></td>
-              </tr>
-              <tr>
-                <td style="font-weight: 600;">0293</td>
-                <td>75K+ | Children: No</td>
-                <td><span style="color: var(--status-danger);">Declining (-12%)</span></td>
-                <td><span style="color: var(--accent-cyan);">Organic Produce</span></td>
-                <td><button class="btn-secondary" style="padding: 6px 12px; font-size: 0.8rem;">Send Coupon</button></td>
-              </tr>
-              <tr>
-                <td style="font-weight: 600;">0182</td>
-                <td>Under 35K | Children: Yes</td>
-                <td><span style="color: var(--text-muted);">Stagnant</span></td>
-                <td><span style="color: var(--accent-cyan);">Private Label Snacks</span></td>
-                <td><button class="btn-secondary" style="padding: 6px 12px; font-size: 0.8rem;">Send Coupon</button></td>
-              </tr>
+            <tbody id="churn-table-body">
+              <tr><td colspan="5" style="text-align:center; color: var(--text-muted);">Running churn regressions...</td></tr>
             </tbody>
           </table>
         </div>
       </div>
-      
+
     </main>
   </div>
 
+  <script src="js/api.js"></script>
+  <script src="js/session.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

@@ -1,0 +1,45 @@
+
+.DS_Store
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.venv/
+venv/
+env/
+.Python
+*.egg
+build/
+dist/
+
+# Azure Functions
+api/local.settings.json
+local.settings.json
+.azure/
+bin/
+obj/
+
+# Node (if added later)
+node_modules/
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea/
+*.swp
+*.swo
+
+# Data (keep CSVs out of source control once uploaded)
+# Comment these out if you need the CSVs tracked for the assignment
+# 8451_The_Complete_Journey_2_Sample/400_transactions.csv
+# 8451_The_Complete_Journey_2_Sample/400_households.csv
+# 8451_The_Complete_Journey_2_Sample/400_products.csv
+
+# Generated / artifacts
+output/
+tmp/
+*.bak

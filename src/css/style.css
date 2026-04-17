@@ -310,3 +310,134 @@ a:hover {
     color: var(--text-muted);
     margin-bottom: 16px;
 }
+
+/* ----- Added in v2: search, dashboard extras ----- */
+
+.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+.metric-hint {
+    margin-top: 6px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.metric-card.error {
+    color: var(--status-danger);
+    padding: 16px 20px;
+    font-size: 0.9rem;
+}
+
+.badge-info {
+    background: rgba(0, 240, 255, 0.12);
+    color: var(--accent-cyan);
+    border: 1px solid rgba(0, 240, 255, 0.35);
+}
+
+/* Demographic info grid shown on search page */
+.demo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+}
+.demo-stat {
+    background: rgba(0, 0, 0, 0.18);
+    border: 1px solid var(--border-glass);
+    border-radius: 10px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.demo-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.demo-value {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* Churn status chips */
+.count-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border-glass);
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-right: 8px;
+}
+.count-chip strong {
+    color: var(--text-primary);
+    font-weight: 700;
+}
+.count-chip.tone-success { border-color: rgba(16,185,129,0.4); color: var(--status-success); }
+.count-chip.tone-danger  { border-color: rgba(239,68,68,0.4); color: var(--status-danger); }
+.count-chip.tone-warn    { border-color: rgba(245,158,11,0.4); color: #F59E0B; }
+.count-chip.tone-muted   { border-color: var(--border-glass); }
+
+/* Upload log */
+.upload-row {
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--border-glass);
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+.upload-row.pending { background: rgba(0, 240, 255, 0.06); color: var(--accent-cyan); }
+.upload-row.success { background: rgba(16,185,129,0.08); color: var(--status-success); }
+.upload-row.error   { background: rgba(239,68,68,0.08); color: var(--status-danger); }
+
+/* Small demographic spend rows */
+.demo-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px dashed rgba(255,255,255,0.05);
+    font-size: 0.9rem;
+}
+.demo-row:last-child { border-bottom: 0; }
+
+.btn-secondary.small {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+}
+
+.error { color: var(--status-danger); }
+
+/* Two-column layout for dashboard grid sections */
+.dashboard-two-col {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+.chart-container.small { height: 280px; }
+
+.section-title {
+    font-weight: 600;
+    font-size: 1rem;
+    margin: 0;
+}
+
+.section-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border-glass);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Responsive sidebar behaviour */
+@media (max-width: 900px) {
+    .app-container { flex-direction: column; height: auto; }
+    .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--border-glass); }
+    .main-content { padding: 24px; }
+}

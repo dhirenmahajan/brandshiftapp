@@ -1,56 +1,49 @@
 import logging
-import json
 import azure.functions as func
 
-from shared_code.db import get_db_connection
+from shared_code.db import (
+    cors_preflight,
+    error_response,
+    fetch_all_dicts,
+    get_db_connection,
+    json_response,
+)
+
+QUERY = """
+SELECT
+    t.HSHD_NUM       AS Hshd_num,
+    t.BASKET_NUM     AS Basket_num,
+    t.PURCHASE_DATE  AS [Date],
+    t.PRODUCT_NUM    AS Product_num,
+    p.DEPARTMENT     AS Department,
+    p.COMMODITY      AS Commodity,
+    t.SPEND          AS Spend,
+    t.UNITS          AS Units
+FROM dbo.Transactions t
+LEFT JOIN dbo.Households h ON t.HSHD_NUM = h.HSHD_NUM
+LEFT JOIN dbo.Products   p ON t.PRODUCT_NUM = p.PRODUCT_NUM
+WHERE t.HSHD_NUM = %s
+ORDER BY
+    t.HSHD_NUM ASC,
+    t.BASKET_NUM ASC,
+    t.PURCHASE_DATE ASC,
+    t.PRODUCT_NUM ASC,
+    p.DEPARTMENT ASC,
+    p.COMMODITY ASC;
+"""
+
 
 def main(req: func.HttpRequest) -> func.HttpResponse:
-    logging.info('Executing GetHousehold10 function.')
+    if req.method == "OPTIONS":
+        return cors_preflight()
 
-    query = """
-    SELECT 
-        t.Hshd_num, 
-        t.Basket_num, 
-        t.PURCHASE_DATE as Date, 
-        t.Product_num, 
-        p.Department, 
-        p.Commodity
-    FROM 
-        dbo.Transactions t
-    LEFT JOIN 
-        dbo.Households h ON t.Hshd_num = h.Hshd_num
-    LEFT JOIN 
-        dbo.Products p ON t.Product_num = p.Product_num
-    WHERE 
-        t.Hshd_num = 10
-    ORDER BY 
-        t.Hshd_num ASC, 
-        t.Basket_num ASC, 
-        t.PURCHASE_DATE ASC, 
-        t.Product_num ASC, 
-        p.Department ASC, 
-        p.Commodity ASC;
-    """
+    logging.info("Executing GetHousehold10 function.")
 
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute(query)
-        
-        columns = [column[0] for column in cursor.description]
-        results = []
-        for row in cursor.fetchall():
-            results.append(dict(zip(columns, row)))
-            
-        return func.HttpResponse(
-            json.dumps(results, default=str),
-            mimetype="application/json",
-            status_code=200
-        )
-
-    except Exception as e:
-        logging.error(f"Error querying database: {e}")
-        return func.HttpResponse(
-            "An error occurred while fetching Household 10 data.",
-            status_code=500
-        )
+        cursor.execute(QUERY, (10,))
+        return json_response(fetch_all_dicts(cursor))
+    except Exception as exc:  # noqa: BLE001
+        logging.exception("GetHousehold10 failed: %s", exc)
+        return error_response("An error occurred while fetching Household 10 data.")

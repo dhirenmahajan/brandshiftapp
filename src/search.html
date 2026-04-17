@@ -8,9 +8,8 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <div class="app-container">
-    
-    <!-- Sidebar Navigation -->
+  <div id="search-root" class="app-container">
+
     <aside class="sidebar">
       <div class="brand-header">
         <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent-cyan)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -23,39 +22,42 @@
           <li><a href="dashboard.html" class="nav-item">Dashboard</a></li>
           <li><a href="search.html" class="nav-item active">Data Search</a></li>
           <li><a href="upload.html" class="nav-item">Data Upload</a></li>
-          <li style="margin-top: 40px;"><a href="index.html" class="nav-item" style="color: var(--status-danger);">Logout</a></li>
+          <li style="margin-top: 40px;"><a href="#" data-action="logout" class="nav-item" style="color: var(--status-danger);">Logout</a></li>
         </ul>
       </nav>
+      <div style="margin-top: auto; font-size: 0.8rem; color: var(--text-muted);">
+        Signed in as <strong id="session-user">Analyst</strong>
+      </div>
     </aside>
 
-    <!-- Main Content -->
     <main class="main-content">
       <header class="page-header">
-        <h1 class="page-title">Interactive Data Search</h1>
-        <p class="page-subtitle">Query specific household transaction histories from the Azure Data Store.</p>
+        <h1 class="page-title">Interactive Household Pull</h1>
+        <p class="page-subtitle">Query specific household transaction histories from the Azure SQL warehouse. Sorted by Basket, Date, Product, Department, Commodity as required by the 84.51° brief.</p>
       </header>
 
-      <div class="glass-panel" style="padding: 32px; margin-bottom: 32px;">
-        <form id="search-form" style="display: flex; gap: 16px; align-items: flex-end;">
-          <div class="form-group" style="margin-bottom: 0; flex: 1; max-width: 400px;">
+      <div class="glass-panel" style="padding: 24px; margin-bottom: 24px;">
+        <form id="search-form" style="display: flex; gap: 16px; align-items: flex-end; flex-wrap: wrap;">
+          <div class="form-group" style="margin-bottom: 0; flex: 1; min-width: 240px; max-width: 400px;">
             <label for="hshd_num" class="form-label">Household Number (HSHD_NUM)</label>
-            <input id="hshd_num" name="hshd_num" type="text" class="form-input" placeholder="e.g. 10" required />
+            <input id="hshd_num" name="hshd_num" type="number" min="1" class="form-input" placeholder="e.g. 10" required />
           </div>
           <button type="submit" class="btn-primary">Execute Query</button>
-          <button type="button" id="hh10-btn" class="btn-secondary">Demo: Fetch HH #10 Pull</button>
+          <button type="button" id="hh10-btn" class="btn-secondary">Demo: Pull HH #10</button>
         </form>
       </div>
 
       <div id="results">
-        <!-- Results table injected by app.js -->
-        <div style="text-align: center; padding: 40px; color: var(--text-muted); border: 1px dashed var(--border-glass); border-radius: 8px;">
-          Enter a household number above to pull transaction data.
+        <div style="text-align: center; padding: 40px; color: var(--text-muted); border: 1px dashed var(--border-glass); border-radius: 12px;">
+          Enter a household number above to pull transaction data from Azure SQL.
         </div>
       </div>
     </main>
 
   </div>
 
+  <script src="js/api.js"></script>
+  <script src="js/session.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

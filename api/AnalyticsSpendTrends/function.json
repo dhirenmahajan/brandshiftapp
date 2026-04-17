@@ -5,8 +5,8 @@
       "type": "httpTrigger",
       "direction": "in",
       "name": "req",
-      "methods": ["get", "post", "options"],
-      "route": "SearchData"
+      "methods": ["get", "options"],
+      "route": "analytics/spend-trends"
     },
     {
       "type": "http",
