@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BrandShift | Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="app-container">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="brand-header">
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent-cyan)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+        </svg>
+        <span class="brand-text">BrandShift</span>
+      </div>
+      <nav>
+        <ul class="nav-links">
+          <li><a href="dashboard.html" class="nav-item active">Dashboard</a></li>
+          <li><a href="search.html" class="nav-item">Data Search</a></li>
+          <li><a href="upload.html" class="nav-item">Data Upload</a></li>
+          <li style="margin-top: 40px;"><a href="index.html" class="nav-item" style="color: var(--status-danger);">Logout</a></li>
+        </ul>
+      </nav>
+      
+      <!-- Demographic Filters -->
+      <div style="margin-top: 40px; border-top: 1px solid var(--border-glass); padding-top: 24px;">
+        <h4 style="color: var(--text-muted); margin-bottom: 16px; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px;">Demographic Filters</h4>
+        <div class="form-group">
+          <select class="form-input" style="padding: 8px;">
+            <option>All Regions</option>
+            <option>East</option>
+            <option>West</option>
+            <option>South</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <select class="form-input" style="padding: 8px;">
+            <option>All Incomes</option>
+            <option>Under 35K</option>
+            <option>35K - 75K</option>
+            <option>75K+</option>
+          </select>
+        </div>
+        <button class="btn-secondary" style="width: 100%; padding: 8px; font-size: 0.9rem;">Apply Filters</button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <header class="page-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <div>
+          <h1 class="page-title">Executive Dashboard</h1>
+          <p class="page-subtitle">Proactive Margin-Boosting Analysis & ML Churn Prediction</p>
+        </div>
+        <button class="btn-primary">Export Report PDF</button>
+      </header>
+
+      <!-- KPI Grid -->
+      <div class="dashboard-grid">
+        <div class="glass-panel metric-card">
+          <span class="metric-title">Total Processed Spend (YTD)</span>
+          <span class="metric-value">$1,245,600</span>
+          <div style="margin-top: 8px; display: flex; align-items: center; gap: 8px; color: var(--status-success); font-size: 0.9rem;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+            <span>+12.5% vs Last Year</span>
+          </div>
+        </div>
+        <div class="glass-panel metric-card">
+          <span class="metric-title">Private Label Conversion Rate</span>
+          <span class="metric-value">34.2%</span>
+          <div style="margin-top: 8px; display: flex; align-items: center; gap: 8px; color: var(--status-success); font-size: 0.9rem;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+            <span>+5.1% Shift</span>
+          </div>
+        </div>
+        <div class="glass-panel metric-card">
+          <span class="metric-title">High Risk Churn Households</span>
+          <span class="metric-value" style="color: var(--status-danger);">28</span>
+          <div style="margin-top: 8px; display: flex; align-items: center; gap: 8px; color: var(--status-danger); font-size: 0.9rem;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline><polyline points="17 18 23 18 23 12"></polyline></svg>
+            <span>Based on Grad. Boosting Model</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Area -->
+      <div class="glass-panel" style="margin-bottom: 32px;">
+        <div style="padding: 24px; border-bottom: 1px solid var(--border-glass);">
+          <h3 style="font-weight: 600;">Spend Momentum: National vs. Private Label & Organic</h3>
+        </div>
+        <div class="chart-container">
+          <canvas id="spendShiftChart"></canvas>
+        </div>
+      </div>
+
+      <div class="glass-panel" style="margin-bottom: 32px;">
+        <div style="padding: 24px; border-bottom: 1px solid var(--border-glass);">
+          <h3 style="font-weight: 600;">Churn Risk Profile: Predict Disengagement Over Time (Linear Regression Output)</h3>
+        </div>
+        <div class="chart-container">
+          <canvas id="churnChart"></canvas>
+        </div>
+      </div>
+
+      <!-- ML Output Table -->
+      <div class="glass-panel">
+        <div style="padding: 24px; border-bottom: 1px solid var(--border-glass); display: flex; justify-content: space-between; align-items: center;">
+          <h3 style="font-weight: 600;">ML Re-engagement Engine (Gradient Boosting)</h3>
+          <span class="badge badge-risk">Live Inference</span>
+        </div>
+        <div class="data-table-container" style="border: none;">
+          <table class="brand-table">
+            <thead>
+              <tr>
+                <th>HSHD_NUM</th>
+                <th>Est. Demographics</th>
+                <th>Spend Trajectory</th>
+                <th>Cross-Sell Recommendation</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="font-weight: 600;">0014</td>
+                <td>35K - 75K | Children: Yes</td>
+                <td><span style="color: var(--status-danger);">Declining (-15%)</span></td>
+                <td><span style="color: var(--accent-cyan);">Private Label Cereal</span></td>
+                <td><button class="btn-secondary" style="padding: 6px 12px; font-size: 0.8rem;">Send Coupon</button></td>
+              </tr>
+              <tr>
+                <td style="font-weight: 600;">0293</td>
+                <td>75K+ | Children: No</td>
+                <td><span style="color: var(--status-danger);">Declining (-12%)</span></td>
+                <td><span style="color: var(--accent-cyan);">Organic Produce</span></td>
+                <td><button class="btn-secondary" style="padding: 6px 12px; font-size: 0.8rem;">Send Coupon</button></td>
+              </tr>
+              <tr>
+                <td style="font-weight: 600;">0182</td>
+                <td>Under 35K | Children: Yes</td>
+                <td><span style="color: var(--text-muted);">Stagnant</span></td>
+                <td><span style="color: var(--accent-cyan);">Private Label Snacks</span></td>
+                <td><button class="btn-secondary" style="padding: 6px 12px; font-size: 0.8rem;">Send Coupon</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+    </main>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

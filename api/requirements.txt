@@ -1,0 +1,3 @@
+pymssql
+pandas
+azure-functions

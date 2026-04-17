@@ -1,0 +1,8 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "FUNCTIONS_WORKER_RUNTIME": "python",
+    "AzureWebJobsFeatureFlags": "EnableWorkerIndexing",
+    "SqlConnectionString": "Driver={ODBC Driver 17 for SQL Server};Server=tcp:brandshift-svr-123.database.windows.net,1433;Database=BrandShift-RG;Uid=mahajadn;Pwd=CloudFinal2026;Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30;"
+  }
+}

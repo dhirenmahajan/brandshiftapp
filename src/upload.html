@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BrandShift | Data Upload</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app-container">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="brand-header">
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent-cyan)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+        </svg>
+        <span class="brand-text">BrandShift</span>
+      </div>
+      <nav>
+        <ul class="nav-links">
+          <li><a href="dashboard.html" class="nav-item">Dashboard</a></li>
+          <li><a href="search.html" class="nav-item">Data Search</a></li>
+          <li><a href="upload.html" class="nav-item active">Data Upload</a></li>
+          <li style="margin-top: 40px;"><a href="index.html" class="nav-item" style="color: var(--status-danger);">Logout</a></li>
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <header class="page-header">
+        <h1 class="page-title">Data Ingestion Engine</h1>
+        <p class="page-subtitle">Upload the latest Transactions, Households, and Products files to the Azure Data Store.</p>
+      </header>
+
+      <div class="glass-panel" style="padding: 40px; margin-bottom: 32px;">
+        <div id="upload-area" class="upload-area">
+          <div class="upload-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+          </div>
+          <h3 style="margin-bottom: 8px;">Drag & Drop CSV Files Here</h3>
+          <p style="color: var(--text-muted); margin-bottom: 16px;">Files supported: 400_transactions.csv, 400_households.csv, 400_products.csv</p>
+          <button class="btn-secondary" onclick="document.getElementById('csv-file').click()">Browse Files</button>
+          
+          <form id="upload-form" enctype="multipart/form-data" style="display: none;">
+            <input id="csv-file" name="csv-file" type="file" accept=".csv" />
+          </form>
+        </div>
+
+        <div id="upload-status" style="margin-top: 24px;"></div>
+      </div>
+    </main>
+
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
