@@ -1,23 +1,28 @@
 /**
  * BrandShift frontend API config.
  *
- * When the site is served by Azure Static Web Apps linked to the Function App,
- * the platform auto-proxies /api/* to the backend on the same origin. That is
- * the preferred path (no CORS, shorter URL, works on preview environments).
+ * The backend is deployed as a standalone Azure Function App
+ * (brandshift-api-dhiren-*.azurewebsites.net), NOT as Static Web Apps
+ * Managed Functions. That means the SWA origin does not proxy /api/* to
+ * the Function App, so we always call the Function App host directly.
  *
- * When you open the HTML files locally (file:// or a plain static server) there
- * is no /api proxy, so we fall back to the fully-qualified Azure Functions URL.
+ * You can override the backend host at runtime by setting
+ * window.BRANDSHIFT_API_BASE BEFORE api.js loads (e.g. in a <script>
+ * tag above this one), which is handy for local `func start` on
+ * http://localhost:7071/api.
+ *
+ * IMPORTANT: The Function App must allow the SWA origin under
+ *   Azure Portal → Function App → CORS
+ * (add https://nice-sky-0f57ad11e.2.azurestaticapps.net and any preview
+ *  domains you use). '*' works too but blocks credentials.
  */
 (function initApi() {
-    const DIRECT_API = "https://brandshift-api-dhiren-ereffhe9cqcfhhe4.westus2-01.azurewebsites.net/api";
+    const DEFAULT_API = "https://brandshift-api-dhiren-ereffhe9cqcfhhe4.westus2-01.azurewebsites.net/api";
 
-    const isHttp = typeof window !== "undefined" &&
-                   window.location &&
-                   /^https?:$/.test(window.location.protocol);
-
-    // If we're on http(s) we assume the SWA /api proxy is available.
-    // For file:// preview we reach directly to the deployed Functions host.
-    const BASE = isHttp ? "/api" : DIRECT_API;
+    // Respect a page-level override, then fall back to the deployed Function App.
+    const BASE = (typeof window !== "undefined" && window.BRANDSHIFT_API_BASE)
+        ? String(window.BRANDSHIFT_API_BASE).replace(/\/+$/, "")
+        : DEFAULT_API;
 
     function url(path) {
         const clean = String(path || "").replace(/^\/+/, "");
@@ -47,7 +52,22 @@
         if (body instanceof FormData) init.body = body;
         else if (body !== undefined) init.body = JSON.stringify(body);
 
-        const response = await fetch(target, init);
+        let response;
+        try {
+            response = await fetch(target, init);
+        } catch (netErr) {
+            // CORS failures and DNS / connectivity issues land here with
+            // TypeError: Failed to fetch – give the developer a hint.
+            const err = new Error(
+                `Network error contacting ${target}. ` +
+                "Check that the Function App is running and that its CORS " +
+                "configuration allows this origin. " +
+                `(${netErr.message || netErr})`
+            );
+            err.cause = netErr;
+            throw err;
+        }
+
         if (!response.ok) {
             let msg = `Request failed (${response.status})`;
             try {
