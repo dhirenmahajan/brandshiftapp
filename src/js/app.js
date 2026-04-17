@@ -14,6 +14,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const api = window.BrandShiftAPI;
     const session = window.BrandShiftSession;
 
+    // Dashboard state. Declared up top so every dashboard helper that
+    // references them is past the temporal dead zone when invoked.
+    const chartRegistry = {};
+    let currentFilters = {};
+
     // ------------------------------------------------------------------
     // Authentication pages
     // ------------------------------------------------------------------
@@ -277,9 +282,6 @@ document.addEventListener("DOMContentLoaded", () => {
     // ------------------------------------------------------------------
     // Dashboard
     // ------------------------------------------------------------------
-    const chartRegistry = {};
-    let currentFilters = {};
-
     function initDashboard() {
         if (typeof Chart === "undefined") {
             console.error("Chart.js not loaded.");
