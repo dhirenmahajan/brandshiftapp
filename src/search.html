@@ -4,7 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BrandShift | Data Search</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -12,17 +13,17 @@
 
     <aside class="sidebar">
       <div class="brand-header">
-        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent-cyan)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--primary-container)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
         </svg>
         <span class="brand-text">BrandShift</span>
       </div>
       <nav>
         <ul class="nav-links">
-          <li><a href="dashboard.html" class="nav-item">Dashboard</a></li>
-          <li><a href="search.html" class="nav-item active">Data Search</a></li>
-          <li><a href="upload.html" class="nav-item">Data Upload</a></li>
-          <li style="margin-top: 40px;"><a href="#" data-action="logout" class="nav-item" style="color: var(--status-danger);">Logout</a></li>
+          <li><a href="dashboard.html" class="nav-item"><span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span> Dashboard</a></li>
+          <li><a href="search.html" class="nav-item active"><span class="material-symbols-outlined">manage_accounts</span> Household Search</a></li>
+          <li><a href="upload.html" class="nav-item"><span class="material-symbols-outlined">cloud_upload</span> Data Engine</a></li>
+          <li style="margin-top: 40px;"><a href="#" data-action="logout" class="nav-item" style="color: var(--status-danger);"><span class="material-symbols-outlined">logout</span> Logout</a></li>
         </ul>
       </nav>
       <div style="margin-top: auto; font-size: 0.8rem; color: var(--text-muted);">
