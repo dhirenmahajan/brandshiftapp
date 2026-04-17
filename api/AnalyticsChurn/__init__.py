@@ -23,29 +23,53 @@ from shared_code.db import (
     json_response,
 )
 
-QUARTERLY_SQL = """
-SELECT
-    t.HSHD_NUM AS hshd_num,
-    t.YEAR     AS year_num,
-    DATEPART(QUARTER, t.PURCHASE_DATE) AS quarter_num,
-    CAST(ISNULL(SUM(t.SPEND), 0) AS DECIMAL(18,2)) AS spend,
-    COUNT(DISTINCT t.BASKET_NUM) AS baskets
-FROM dbo.Transactions t
-WHERE t.PURCHASE_DATE IS NOT NULL
-GROUP BY t.HSHD_NUM, t.YEAR, DATEPART(QUARTER, t.PURCHASE_DATE)
-ORDER BY t.HSHD_NUM, t.YEAR, quarter_num;
-"""
+FILTER_CLAUSES = {
+    "region":   "t.STORE_R = %s",
+    "income":   "h.INCOME_RANGE = %s",
+    "size":     "h.HH_SIZE = %s",
+    "children": "h.CHILDREN = %s",
+}
 
-MONTHLY_SQL = """
-SELECT
-    t.YEAR AS year_num,
-    DATEPART(MONTH, t.PURCHASE_DATE) AS month_num,
-    COUNT(DISTINCT t.HSHD_NUM) AS active_hshds
-FROM dbo.Transactions t
-WHERE t.PURCHASE_DATE IS NOT NULL
-GROUP BY t.YEAR, DATEPART(MONTH, t.PURCHASE_DATE)
-ORDER BY t.YEAR, month_num;
-"""
+
+def _filter(req: func.HttpRequest):
+    clauses = []
+    params = []
+    for key, template in FILTER_CLAUSES.items():
+        val = req.params.get(key)
+        if val and val.lower() != "all":
+            clauses.append(template)
+            params.append(val)
+    return (" AND " + " AND ".join(clauses)) if clauses else "", params
+
+
+def _quarterly_sql(filter_sql: str) -> str:
+    return f"""
+    SELECT
+        t.HSHD_NUM AS hshd_num,
+        t.YEAR     AS year_num,
+        DATEPART(QUARTER, t.PURCHASE_DATE) AS quarter_num,
+        CAST(ISNULL(SUM(t.SPEND), 0) AS DECIMAL(18,2)) AS spend,
+        COUNT(DISTINCT t.BASKET_NUM) AS baskets
+    FROM dbo.Transactions t
+    LEFT JOIN dbo.Households h ON t.HSHD_NUM = h.HSHD_NUM
+    WHERE t.PURCHASE_DATE IS NOT NULL {filter_sql}
+    GROUP BY t.HSHD_NUM, t.YEAR, DATEPART(QUARTER, t.PURCHASE_DATE)
+    ORDER BY t.HSHD_NUM, t.YEAR, quarter_num;
+    """
+
+
+def _monthly_sql(filter_sql: str) -> str:
+    return f"""
+    SELECT
+        t.YEAR AS year_num,
+        DATEPART(MONTH, t.PURCHASE_DATE) AS month_num,
+        COUNT(DISTINCT t.HSHD_NUM) AS active_hshds
+    FROM dbo.Transactions t
+    LEFT JOIN dbo.Households h ON t.HSHD_NUM = h.HSHD_NUM
+    WHERE t.PURCHASE_DATE IS NOT NULL {filter_sql}
+    GROUP BY t.YEAR, DATEPART(MONTH, t.PURCHASE_DATE)
+    ORDER BY t.YEAR, month_num;
+    """
 
 DEMOG_SQL = """
 SELECT
@@ -78,14 +102,16 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     if req.method == "OPTIONS":
         return cors_preflight()
 
+    filter_sql, params = _filter(req)
+
     try:
         conn = get_db_connection()
         cur = conn.cursor()
 
-        cur.execute(QUARTERLY_SQL)
+        cur.execute(_quarterly_sql(filter_sql), tuple(params))
         q_rows = fetch_all_dicts(cur)
 
-        cur.execute(MONTHLY_SQL)
+        cur.execute(_monthly_sql(filter_sql), tuple(params))
         m_rows = fetch_all_dicts(cur)
 
         cur.execute(DEMOG_SQL)
@@ -151,4 +177,4 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         })
     except Exception as exc:  # noqa: BLE001
         logging.exception("AnalyticsChurn failed: %s", exc)
-        return error_response("Failed to compute churn analytics.")
+        return error_response(f"Failed to compute churn analytics: {exc}")
