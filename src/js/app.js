@@ -234,10 +234,40 @@ document.addEventListener("DOMContentLoaded", () => {
     function bindUpload() {
         const uploadArea = document.getElementById("upload-area");
         const fileInput = document.getElementById("csv-file");
+        const browseBtn = document.getElementById("browse-btn");
         const status = document.getElementById("upload-status");
         if (!uploadArea || !fileInput) return;
 
-        uploadArea.addEventListener("click", () => fileInput.click());
+        // Single source of truth for opening the OS file picker. The <button>
+        // and the <div> both point here so we never fire .click() twice in the
+        // same tick (Safari drops the dialog when that happens).
+        let pickerOpening = false;
+        function openPicker() {
+            if (pickerOpening) return;
+            pickerOpening = true;
+            fileInput.value = "";
+            fileInput.click();
+            setTimeout(() => { pickerOpening = false; }, 400);
+        }
+
+        if (browseBtn) {
+            browseBtn.addEventListener("click", (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                openPicker();
+            });
+        }
+        uploadArea.addEventListener("click", (e) => {
+            if (e.target.closest("#browse-btn")) return;
+            openPicker();
+        });
+        uploadArea.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                openPicker();
+            }
+        });
+
         uploadArea.addEventListener("dragover", (e) => {
             e.preventDefault();
             uploadArea.classList.add("dragover");
@@ -246,37 +276,57 @@ document.addEventListener("DOMContentLoaded", () => {
         uploadArea.addEventListener("drop", (e) => {
             e.preventDefault();
             uploadArea.classList.remove("dragover");
-            if (e.dataTransfer.files.length > 0) handleUpload(e.dataTransfer.files);
+            if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                handleUpload(e.dataTransfer.files);
+            }
         });
         fileInput.addEventListener("change", (e) => {
-            if (e.target.files.length > 0) handleUpload(e.target.files);
+            if (e.target.files && e.target.files.length > 0) {
+                handleUpload(e.target.files);
+            }
         });
 
+        function renderRow(file, state, message) {
+            const row = document.createElement("div");
+            row.className = `upload-row ${state}`;
+            row.dataset.file = file.name;
+            row.innerHTML = `<strong>${escapeHtml(file.name)}</strong> — ${escapeHtml(message)}`;
+            return row;
+        }
+        function updateRow(row, state, message) {
+            row.className = `upload-row ${state}`;
+            row.innerHTML = `<strong>${escapeHtml(row.dataset.file)}</strong> — ${escapeHtml(message)}`;
+        }
+
         async function handleUpload(files) {
-            const results = [];
+            uploadArea.classList.add("busy");
             for (const file of files) {
-                status.innerHTML = appendUploadLog(status.innerHTML,
-                    `<div class="upload-row pending">Uploading <strong>${file.name}</strong>...</div>`);
+                const row = renderRow(file, "pending", "uploading…");
+                status.appendChild(row);
                 const form = new FormData();
                 form.append("file", file);
                 try {
                     const data = await api.post("UploadData", form);
-                    results.push({ file: file.name, ok: true, data });
+                    updateRow(row, "success", data && data.message
+                        ? data.message
+                        : "loaded");
                 } catch (err) {
-                    results.push({ file: file.name, ok: false, error: err.message });
+                    updateRow(row, "error", (err && err.message) || "Upload failed.");
                 }
             }
-            status.innerHTML = results.map((r) => {
-                if (r.ok) {
-                    return `<div class="upload-row success"><strong>${r.file}</strong> → ${r.data.message || "loaded"}</div>`;
-                }
-                return `<div class="upload-row error"><strong>${r.file}</strong> failed: ${r.error}</div>`;
-            }).join("");
+            uploadArea.classList.remove("busy");
+            // Allow re-uploading the exact same file immediately.
+            fileInput.value = "";
         }
     }
 
-    function appendUploadLog(current, html) {
-        return (current || "") + html;
+    function escapeHtml(value) {
+        return String(value == null ? "" : value)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#39;");
     }
 
     // ------------------------------------------------------------------

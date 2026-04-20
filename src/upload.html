@@ -38,7 +38,7 @@
       </header>
 
       <div class="glass-panel" style="padding: 32px; margin-bottom: 32px;">
-        <div id="upload-area" class="upload-area">
+        <div id="upload-area" class="upload-area" role="button" tabindex="0" aria-label="Drop CSV files here or press Enter to browse">
           <div class="upload-icon">
             <svg xmlns="http://www.w3.org/2000/svg" width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -48,14 +48,12 @@
           </div>
           <h3 style="margin-bottom: 8px;">Drag &amp; drop CSV files here</h3>
           <p style="color: var(--text-muted); margin-bottom: 16px;">Accepted: <code>400_transactions.csv</code>, <code>400_households.csv</code>, <code>400_products.csv</code>. You can drop multiple files at once.</p>
-          <button class="btn-secondary" type="button" onclick="document.getElementById('csv-file').click()">Browse Files</button>
-
-          <form id="upload-form" enctype="multipart/form-data" style="display: none;">
-            <input id="csv-file" name="csv-file" type="file" accept=".csv" multiple />
-          </form>
+          <button id="browse-btn" class="btn-secondary" type="button">Browse Files</button>
         </div>
 
-        <div id="upload-status" style="margin-top: 24px;"></div>
+        <input id="csv-file" type="file" accept=".csv,text/csv" multiple style="position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); border:0;" />
+
+        <div id="upload-status" style="margin-top: 24px;" aria-live="polite"></div>
       </div>
 
       <div class="glass-panel" style="padding: 24px;">

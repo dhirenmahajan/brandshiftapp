@@ -103,9 +103,26 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         conn = get_db_connection()
         cursor = conn.cursor()
 
-        # Disable FK constraints during bulk replacement so dependent loads succeed
+        # Tables that reference target_table via FK. TRUNCATE is blocked whenever
+        # another table has an FK pointing at us (even if that FK is disabled and
+        # the referencing table is empty), so we first disable FK checks on the
+        # dependents, then DELETE (which works across FK boundaries once checks
+        # are off), then re-enable everything on the way out.
+        referencing_tables = {
+            "dbo.Households": ["dbo.Transactions"],
+            "dbo.Products":   ["dbo.Transactions"],
+            "dbo.Transactions": [],
+        }.get(target_table, [])
+
+        for t in referencing_tables:
+            cursor.execute(f"ALTER TABLE {t} NOCHECK CONSTRAINT ALL")
         cursor.execute(f"ALTER TABLE {target_table} NOCHECK CONSTRAINT ALL")
-        cursor.execute(f"TRUNCATE TABLE {target_table}")
+
+        if referencing_tables:
+            # DELETE is FK-safe once the referencing constraints are disabled
+            cursor.execute(f"DELETE FROM {target_table}")
+        else:
+            cursor.execute(f"TRUNCATE TABLE {target_table}")
 
         rows = list(df.itertuples(index=False, name=None))
         batch = 1000
@@ -115,6 +132,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
             total += len(rows[i : i + batch])
 
         cursor.execute(f"ALTER TABLE {target_table} WITH CHECK CHECK CONSTRAINT ALL")
+        for t in referencing_tables:
+            cursor.execute(f"ALTER TABLE {t} WITH CHECK CHECK CONSTRAINT ALL")
         conn.commit()
 
         return json_response({

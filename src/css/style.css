@@ -383,6 +383,11 @@ div.glass-panel {
     background: var(--surface-container-highest);
     border-bottom-color: var(--primary-container);
 }
+.upload-area:focus-visible {
+    outline: 2px solid var(--primary-container);
+    outline-offset: 2px;
+}
+.upload-area.busy { opacity: 0.8; pointer-events: none; }
 
 .upload-icon {
     font-size: 3rem;
