@@ -61,8 +61,6 @@ Shared helpers in `api/shared_code`:
 
 ### 3. Data tier — Azure SQL Database
 
-Provisioned off-repo. Canonical schema lives in [`api/schema.sql`](api/schema.sql). The bulk loader [`8451_The_Complete_Journey_2_Sample/azure_insert.py`](8451_The_Complete_Journey_2_Sample/azure_insert.py) seeds it from the three CSVs (PyODBC + SQLAlchemy `fast_executemany`).
-
 ## Local Development
 
 ### Backend
