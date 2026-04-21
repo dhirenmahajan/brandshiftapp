@@ -1,5 +1,8 @@
 # BrandShift Cloud Data Analytics
 
+
+**Live App - https://nice-sky-0f57ad11e.2.azurestaticapps.net**
+
 **University of Cincinnati Cloud Computing Final Project 2026**
 
 End-to-end retail analytics platform built on Azure, analysing the 84.51°/Kroger "Complete Journey 2" sample to answer the brief's retail questions:
